@@ -1,19 +1,15 @@
 package org.coder;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public class AvailabilityDto {
     private int doctorId;
     private String doctorName;
-    private LocalTime time;
-    private LocalDate date;
+    private LocalDateTime date;
 
-
-    public AvailabilityDto(int doctorId, String doctorName, LocalTime time, LocalDate date) {
+    public AvailabilityDto(int doctorId, String doctorName, LocalDateTime date) {
         this.doctorId = doctorId;
         this.doctorName = doctorName;
-        this.time = time;
         this.date = date;
     }
 
@@ -21,15 +17,11 @@ public class AvailabilityDto {
         return doctorId;
     }
 
-    public LocalTime getTime() {
-        return time;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
     public String getDoctorName() {
         return doctorName;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
     }
 }
