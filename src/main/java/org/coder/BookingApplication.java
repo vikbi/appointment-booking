@@ -16,8 +16,8 @@ public class BookingApplication {
         //main function to provide the list of doctors availability for given number of days
         List<AvailabilityDto> availabilities = getAvailability(appointments, doctorSchedules, 10);
 
-        for(AvailabilityDto a : availabilities) {
-            System.out.println("Doctor: "+a.getDoctorId() +" "+ a.getDate().toString() +" "+ a.getTime().toString());
+        for(AvailabilityDto availability : availabilities) {
+            System.out.println("Doctor: "+availability.getDoctorId() +" "+ availability.getDate().toString() +" "+ availability.getTime().toString());
         }
     }
 
@@ -56,15 +56,15 @@ public class BookingApplication {
         workingList1.add(new WorkHourDto(DayOfWeek.MONDAY,
                 LocalTime.of(9,00),
                 LocalTime.of(17,00)));
-//        workingList1.add(new WorkHourDto(DayOfWeek.TUESDAY,
-//                LocalTime.of(9,00),
-//                LocalTime.of(17,00)));
-//        workingList1.add(new WorkHourDto(DayOfWeek.WEDNESDAY,
-//                LocalTime.of(9,00),
-//                LocalTime.of(17,00)));
-//        workingList1.add(new WorkHourDto(DayOfWeek.THURSDAY,
-//                LocalTime.of(9,00),
-//                LocalTime.of(17,00)));
+        workingList1.add(new WorkHourDto(DayOfWeek.TUESDAY,
+                LocalTime.of(9,00),
+                LocalTime.of(17,00)));
+        workingList1.add(new WorkHourDto(DayOfWeek.WEDNESDAY,
+                LocalTime.of(9,00),
+                LocalTime.of(17,00)));
+        workingList1.add(new WorkHourDto(DayOfWeek.THURSDAY,
+                LocalTime.of(9,00),
+                LocalTime.of(17,00)));
         workingList1.add(new WorkHourDto(DayOfWeek.FRIDAY,
                 LocalTime.of(9,00),
                 LocalTime.of(17,00)));
