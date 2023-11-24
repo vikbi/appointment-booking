@@ -16,12 +16,13 @@ public class BookingApplication {
         //main function to provide the list of doctors availability for given number of days
         List<AvailabilityDto> availabilities = getAvailability(appointments, doctorSchedules, 10);
 
+        //To show the output of the function
         for(AvailabilityDto availability : availabilities) {
-            System.out.println("Doctor: "+availability.getDoctorId() +" "+ availability.getDate().toString() +" "+ availability.getTime().toString());
+            System.out.println("Dr. "+availability.getDoctorName() +" available on "+ availability.getDate().toString() +" "+ availability.getTime().toString());
         }
     }
 
-    // to generate appointments for available doctor
+    // To generate appointments dummy data for available doctor
     private static List<AppointmentsDto> generateAppointmentsData() {
         List<AppointmentsDto> appointments = new ArrayList<>();
         AppointmentsDto appointment1 = new AppointmentsDto(1,1,
@@ -29,7 +30,7 @@ public class BookingApplication {
         );
 
         AppointmentsDto appointment2 = new AppointmentsDto(1,2,
-                LocalDateTime.of(LocalDate.of(2023, 11,24), LocalTime.of(12,00))
+                LocalDateTime.of(LocalDate.of(2023, 11,24), LocalTime.of(14,00))
         );
 
         AppointmentsDto appointment3 = new AppointmentsDto(2,1,
@@ -37,14 +38,27 @@ public class BookingApplication {
         );
 
         AppointmentsDto appointment4 = new AppointmentsDto(2,2,
-                LocalDateTime.of(LocalDate.of(2023, 11,24), LocalTime.of(13,00))
+                LocalDateTime.of(LocalDate.of(2023, 11,27), LocalTime.of(13,00))
+        );
+
+        AppointmentsDto appointment5 = new AppointmentsDto(1,1,
+                LocalDateTime.of(LocalDate.of(2023, 11,27), LocalTime.of(13,00))
+        );
+
+        AppointmentsDto appointment6 = new AppointmentsDto(1,2,
+                LocalDateTime.of(LocalDate.of(2023, 12,1), LocalTime.of(11,00))
         );
 
         appointments.add(appointment1);
         appointments.add(appointment2);
         appointments.add(appointment3);
         appointments.add(appointment4);
+        appointments.add(appointment5);
+        appointments.add(appointment6);
 
+        // can add N number of appointments for doctor
+        // Additionally can introduce validation for booking appointments according to doctors working available schedule
+        //
         return appointments;
     }
 
@@ -69,18 +83,18 @@ public class BookingApplication {
                 LocalTime.of(9,00),
                 LocalTime.of(17,00)));
 
-        DoctorScheduleDto doctor1 = new DoctorScheduleDto(1, "DoctorOne", workingList1);
+        DoctorScheduleDto doctor1 = new DoctorScheduleDto(1, "Alex", workingList1);
         doctorSchedules.add(doctor1);
 
-        // add second doctor schedule
+        // add second doctor working schedule
         List<WorkHourDto> workingList2 = new ArrayList<>();
         workingList2.add(new WorkHourDto(DayOfWeek.MONDAY,
                 LocalTime.of(9,00),
                 LocalTime.of(17,00)));
-        DoctorScheduleDto doctor2 = new DoctorScheduleDto(2, "DoctorTwo", workingList2);
+        DoctorScheduleDto doctor2 = new DoctorScheduleDto(2, "Peter", workingList2);
         doctorSchedules.add(doctor2);
 
-        //... can create n number of doctors and their schedule
+        //... can create N number of doctors and their schedule
         return doctorSchedules;
     }
 
@@ -126,15 +140,16 @@ public class BookingApplication {
     // day-wise creating list of doctors and appointments first, then checking if appointment for doctor is exist or not
     // conditionally adding record for availability of each doctor
 
-    // Note: can handle n number of doctors and n number of appointments
+    // Note: can handle N number of doctors and N number of appointments
     private static List<AvailabilityDto> getAvailability(List<AppointmentsDto> appointments, List<DoctorScheduleDto> doctorSchedules, int numberOfDays) {
 
         List<AvailabilityDto> availabilityList = new ArrayList<>();
 
         // current date can be provided as parameter or can be taken from current time
-        LocalDateTime currentDate = LocalDateTime.of(LocalDate.of(2023, 11,24), LocalTime.of(9,00));
+        LocalDateTime currentDate = LocalDateTime.of(LocalDate.of(2023, 11,24), LocalTime.now());
 
-       for(int i = numberOfDays; i > 0; i--) {
+        // Loop for given number of days starting from 24-11-2023
+       for(int num = numberOfDays; num > 0; num--) {
             //get the list of doctors for current day
             List<DoctorScheduleDto> currentDayDoctors = getDoctorsScheduleByDay(doctorSchedules, currentDate.getDayOfWeek());
 
@@ -163,10 +178,10 @@ public class BookingApplication {
                     boolean exist = checkAppointmentForDoctor(currentDayAppointments, currentTime, finalCurrentDate, DoctorScheduleDto.getDoctorId());
                     if (!exist) {
                         // create availability for doctor for current date time
-                        availabilityList.add(new AvailabilityDto(DoctorScheduleDto.getDoctorId(), currentTime, finalCurrentDate.toLocalDate()));
+                        availabilityList.add(new AvailabilityDto(DoctorScheduleDto.getDoctorId(), DoctorScheduleDto.getName(), currentTime, finalCurrentDate.toLocalDate()));
                     }
 
-                    // increment time to check for next hour availability for current doctor
+                    // increment time for next day to check for further availability for current doctor
                     currentTime = currentTime.plusHours(1);
                 }
             });

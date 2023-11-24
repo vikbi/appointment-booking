@@ -5,14 +5,14 @@ import java.time.LocalTime;
 
 public class AvailabilityDto {
     private int doctorId;
+    private String doctorName;
     private LocalTime time;
     private LocalDate date;
 
-    public AvailabilityDto() {
-    }
 
-    public AvailabilityDto(int doctorId, LocalTime time, LocalDate date) {
+    public AvailabilityDto(int doctorId, String doctorName, LocalTime time, LocalDate date) {
         this.doctorId = doctorId;
+        this.doctorName = doctorName;
         this.time = time;
         this.date = date;
     }
@@ -27,5 +27,9 @@ public class AvailabilityDto {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public String getDoctorName() {
+        return doctorName;
     }
 }
