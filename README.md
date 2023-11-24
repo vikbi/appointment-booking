@@ -17,7 +17,7 @@
       List<DoctorScheduleDto> doctorSchedules = generateDoctorsData();
       List<AppointmentsDto> appointments = generateAppointmentsData(); 
       ```
-      * created Dr. Alex works for five days a week and Dr. Peter works on Monday only with standard working schedule from 9am to 5pm.
+      * created Dr. Alex works for five days a week and Dr. Peter works on Monday only with standard working schedule from 9am to 6pm.
         * Booked 6 appointments for two users for following date time for both doctors
           ```
           Doctor Alex
@@ -33,7 +33,9 @@
           ```
           * Function will be called with dummy data and expected number of days availability of each doctor we are looking for, expecting for 10 days.
             ```
-              List<AvailabilityDto> availabilities = getAvailability(appointments, doctorSchedules, 10);
+              List<AvailabilityDto> availabilities = getAvailability(appointments, 
+                                                                      doctorSchedules, 
+                                                                        10);
             ```
             * Printing the results as follows, produce the results by considering current date as <i>2023-11-24 </i>
               ```
