@@ -3,22 +3,16 @@ package org.coder;
 import java.util.List;
 
 public class DoctorScheduleDto {
-    private int doctorId;
-    private String name;
+    private DoctorDto doctor;
     private List<WorkHourDto> schedule;
 
-    public DoctorScheduleDto(int doctorId, String name, List<WorkHourDto> schedule) {
-        this.doctorId = doctorId;
-        this.name = name;
+    public DoctorScheduleDto(DoctorDto doctor, List<WorkHourDto> schedule) {
+        this.doctor = doctor;
         this.schedule = schedule;
     }
 
-    public int getDoctorId() {
-        return doctorId;
-    }
-
-    public String getName() {
-        return name;
+    public DoctorDto getDoctor() {
+        return doctor;
     }
 
     public List<WorkHourDto> getSchedule() {

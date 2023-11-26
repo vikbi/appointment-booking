@@ -17,7 +17,7 @@ public class BookingApplication {
         //To show the output of the function
         availabilities
                 .stream()
-                .map(a -> "Dr. "+a.getDoctorName()+ " available on "+ a.getDate().toLocalDate().toString() + " "+ a.getDate().toLocalTime())
+                .map(a -> "Dr. "+a.getDoctor().getName()+ " available on "+ a.getDate().toLocalDate().toString() + " "+ a.getDate().toLocalTime())
                 .forEach(System.out::println);
     }
 
@@ -40,22 +40,23 @@ public class BookingApplication {
         // current date can be provided as parameter or can be taken from current time
         LocalDateTime currentDate = LocalDateTime.of(LocalDate.of(2023, 11,24), LocalTime.now());
 
+        //day wise list of doctors working in a week, can be cashed for each call
+        Map<String, List<DoctorDto>> dayDoctorsMap = getDoctorsMapByDay(doctorSchedules);
+
         // Loop for given number of days starting from 24-11-2023
         for(int num = numberOfDays; num > 0; num--) {
-            //get the list of doctors working on current day
-            List<DoctorScheduleDto> currentDayDoctors = getDoctorsScheduleByDay(doctorSchedules, currentDate.getDayOfWeek());
-
-            //get the list of appointments for current day
+            // get the doctors working on current day
+            List<DoctorDto> doctorsList = dayDoctorsMap.get(currentDate.getDayOfWeek().toString());
+            //get the list of appointments for current day, same as doctors day wise mapping can be created for appointments
             List<AppointmentsDto> currentDayAppointments = getAppointmentByDay(appointments, MonthDay.of(currentDate.getMonth(), currentDate.getDayOfMonth()));
 
-            //temporarily storing current date into another variable, could be managed from separate function
-            LocalDateTime finalCurrentDate = currentDate;
-
-            currentDayDoctors
-                    .stream()
-                    .map(doctor-> getAvailabilityOfDoctorByDay(doctor, finalCurrentDate, currentDayAppointments))
-                    .forEach(list -> list.stream().forEach(a-> availabilityList.add(a))) ;
-
+            try{
+                for(DoctorDto doctor : doctorsList) {
+                    availabilityList.addAll(getAvailabilityOfDoctorByDay(doctor, currentDate, currentDayAppointments));
+                }
+            }catch (NullPointerException e) {
+                System.out.println("no doctors found for day: "+currentDate.getDayOfWeek());
+            }
             // increment date to next day to get the further doctors availability
             currentDate = currentDate.plusDays(1);
         }
@@ -64,21 +65,14 @@ public class BookingApplication {
     }
 
     // get availability list for given doctor for given date
-    private static List<AvailabilityDto> getAvailabilityOfDoctorByDay(DoctorScheduleDto doctorSchedule,
+    private static List<AvailabilityDto> getAvailabilityOfDoctorByDay(DoctorDto doctor,
                                                                       LocalDateTime currentDate,
                                                                       List<AppointmentsDto> currentDayAppointments){
 
             List<AvailabilityDto> availabilities = new ArrayList<>();
 
-            // get the working schedule for current day for particular doctor
-            WorkHourDto schedule = doctorSchedule
-                    .getSchedule()
-                    .stream()
-                    .filter(WorkHourDto -> WorkHourDto.getDay() == currentDate.getDayOfWeek())
-                    .findAny().get();
-
-            LocalTime startTime = schedule.getStartTime();
-            LocalTime endTime = schedule.getEndTime();
+            LocalTime startTime = doctor.getSchedule().getStartTime();
+            LocalTime endTime = doctor.getSchedule().getEndTime();
             LocalTime currentTime = startTime;
 
             // loop to create availability between start and end time
@@ -90,12 +84,11 @@ public class BookingApplication {
                 if (!checkAppointmentForDoctor(currentDayAppointments,
                         currentTime,
                         currentDate,
-                        doctorSchedule.getDoctorId())) {
+                        doctor.getId())) {
 
                     // create availability for doctor for current date time
                     availabilities.add(new AvailabilityDto(
-                                            doctorSchedule.getDoctorId(),
-                                            doctorSchedule.getName(),
+                                            doctor,
                                             LocalDateTime.of(currentDate.toLocalDate(), currentTime)
                                     ));
                 }
@@ -148,7 +141,10 @@ public class BookingApplication {
 
     // To generate doctors details and their working schedule in a week
     private static List<DoctorScheduleDto> generateDoctorsData() {
-        List<DoctorScheduleDto> doctorSchedules = new ArrayList<DoctorScheduleDto>();
+        List<DoctorScheduleDto> doctorSchedules = new ArrayList<>();
+
+        DoctorDto doctor1 = new DoctorDto(1, "Alex", "Heart Specialist");
+        DoctorDto doctor2 = new DoctorDto(2, "Peter", "Eye Specialist");
 
         List<WorkHourDto> workingList1 = new ArrayList<>();
         workingList1.add(new WorkHourDto(DayOfWeek.MONDAY,
@@ -167,33 +163,59 @@ public class BookingApplication {
                 LocalTime.of(9,00),
                 LocalTime.of(17,00)));
 
-        DoctorScheduleDto doctor1 = new DoctorScheduleDto(1, "Alex", workingList1);
-        doctorSchedules.add(doctor1);
+        doctorSchedules.add( new DoctorScheduleDto(doctor1, workingList1));
 
         // add second doctor working schedule
         List<WorkHourDto> workingList2 = new ArrayList<>();
         workingList2.add(new WorkHourDto(DayOfWeek.MONDAY,
                 LocalTime.of(9,00),
                 LocalTime.of(17,00)));
-        DoctorScheduleDto doctor2 = new DoctorScheduleDto(2, "Peter", workingList2);
-        doctorSchedules.add(doctor2);
+        doctorSchedules.add(new DoctorScheduleDto(doctor2, workingList2));
 
         //... can create N number of doctors and their schedule
         return doctorSchedules;
     }
 
-    // get the available doctors for given day of week
-    private static List<DoctorScheduleDto> getDoctorsScheduleByDay(List<DoctorScheduleDto> doctorSchedules, DayOfWeek day) {
-            return doctorSchedules
+    // get the available doctors for day of week
+    private static Map<String, List<DoctorDto>> getDoctorsMapByDay(List<DoctorScheduleDto> doctorSchedules) {
+
+        Map<String, List<DoctorDto>> doctorsList = new HashMap<String, List<DoctorDto>>();
+        DayOfWeek day = DayOfWeek.MONDAY;
+
+        for(int dayNum=6; dayNum>0; dayNum--){
+            List<DoctorDto> dayList = new ArrayList<>();
+            DayOfWeek currentDay = day;
+            doctorSchedules
                     .stream()
-                    .filter(DoctorScheduleDto ->
-                            DoctorScheduleDto.getSchedule().stream()
-                            .filter(w -> w.getDay() == day).count() > 0
-                    ).collect(Collectors.toList());
+                    .forEach(docSchedule -> {
+                                // check if current day schedule for doctor exists
+                                Optional<WorkHourDto> schedule = docSchedule
+                                                                    .getSchedule()
+                                                                    .stream()
+                                                                    .filter(w-> w.getDay() == currentDay)
+                                                                    .findFirst();
+                                if(!schedule.isEmpty()) {
+                                    DoctorDto doctor = new DoctorDto(
+                                                            docSchedule.getDoctor().getId(),
+                                                            docSchedule.getDoctor().getName(),
+                                                            docSchedule.getDoctor().getDescription(),
+                                                            schedule.get());
+                                        dayList.add(doctor);
+                                        doctorsList.put(currentDay.toString(), dayList);
+                                }
+                    });
+            day = day.plus(1);
+        }
+
+        return doctorsList;
     }
 
-    // get the appointments for given datetime
-    // expecting day of month, edge case: expecting current month values
+    /* get the appointments for given datetime
+
+        if number of appointments are huge,
+        then creating a local map is better to filter out appointments for each day,
+        will reduce iteration time like day wise list of doctors
+    */
     private static List<AppointmentsDto> getAppointmentByDay(List<AppointmentsDto> appointments, MonthDay day){
         return appointments
                 .stream()

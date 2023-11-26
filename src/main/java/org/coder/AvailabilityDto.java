@@ -3,22 +3,16 @@ package org.coder;
 import java.time.LocalDateTime;
 
 public class AvailabilityDto {
-    private int doctorId;
-    private String doctorName;
+    private DoctorDto doctor;
     private LocalDateTime date;
 
-    public AvailabilityDto(int doctorId, String doctorName, LocalDateTime date) {
-        this.doctorId = doctorId;
-        this.doctorName = doctorName;
+    public AvailabilityDto(DoctorDto doctor, LocalDateTime date) {
+        this.doctor = doctor;
         this.date = date;
     }
 
-    public int getDoctorId() {
-        return doctorId;
-    }
-
-    public String getDoctorName() {
-        return doctorName;
+    public DoctorDto getDoctor() {
+        return doctor;
     }
 
     public LocalDateTime getDate() {
